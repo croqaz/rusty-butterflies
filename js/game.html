@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="language" content="english">
+  <meta property="og:locale" content="en_GB">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="author" href="https://crlf.link/author/">
+  <meta name="author" content="Cristi Constantin">
+  <meta name="publisher" content="Cristi Constantin">
+  <meta name="copyright" content="Copyright 1998-2023">
+  <title>Game</title>
+</head>
+<body>
+  <script type="module">
+    const VIEW_W = 28;
+    const VIEW_H = 16;
+    const M_ROWS = 48;
+    const M_COLS = 84;
+    import './style.css';
+    import { render } from 'preact';
+    import App from './app.js';
+    import pkg from "./pkg";
+    import { Wasm } from "./pkg";
+    pkg().then(() => {
+      const r = Math.random() < 0.5 ? -1 * Math.random() : Math.random();
+      const s = parseInt(r * 10_000_000).toString();
+      console.log('Game seed:', s);
+      window.game = new Wasm(VIEW_W, VIEW_H, M_COLS, M_ROWS, s);
+      render(<App />, document.body);
+    });
+  </script>
+</body>
+</html>
