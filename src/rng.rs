@@ -16,7 +16,6 @@ pub struct Rng {
     c: i64,
 }
 
-#[allow(dead_code)]
 impl Rng {
     /// Create a random number generator from specified seed
     ///
@@ -68,6 +67,7 @@ impl Rng {
 
     /// Pseudorandom value [1,100], uniformly distributed
     ///
+    #[allow(dead_code)]
     pub fn get_percentage(&mut self) -> u8 {
         1 + (self.get_uniform() * 100.0).floor() as u8
     }

@@ -39,8 +39,5 @@
     "last 1 version",
     "> 5%",
     "not dead"
-  ],
-  "jest": {
-    "preset": "jest-preset-preact"
-  }
+  ]
 }

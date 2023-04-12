@@ -8,14 +8,14 @@ class GameGrid extends Component {
   onKeyPressed = (ev) => {
     if (ev.key === "w") {
       // try to move Nord, up
-      window.game.slide_view("n");
+      window.Game.slide_view(window.Direction.N);
     } else if (ev.key === "s") {
       // try to move South, down
-      window.game.slide_view("s");
+      window.Game.slide_view(window.Direction.S);
     } else if (ev.key === "a") {
-      window.game.slide_view("w");
+      window.Game.slide_view(window.Direction.W);
     } else if (ev.key === "d") {
-      window.game.slide_view("e");
+      window.Game.slide_view(window.Direction.E);
     }
     this.setState({ turns: this.state.turns + 1 });
   };
@@ -37,7 +37,7 @@ class GameGrid extends Component {
   }
 
   render() {
-    const tiles = window.game ? window.game.render() : [[]];
+    const tiles = window.Game ? window.Game.render() : [[]];
     const gridCol = (cell, c, r) => {
       return (
         <td

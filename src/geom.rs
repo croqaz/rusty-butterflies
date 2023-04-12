@@ -1,8 +1,9 @@
 use std::cmp;
+use wasm_bindgen::prelude::*;
 
 use crate::game::Game;
 
-#[allow(dead_code)]
+#[wasm_bindgen]
 pub enum Direction {
     N,
     Up,
@@ -14,7 +15,18 @@ pub enum Direction {
     Left,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+impl Direction {
+    pub fn to_offset(&self) -> (i16, i16) {
+        match self {
+            Self::N | Self::Up => (0, -1),
+            Self::S | Self::Down => (0, 1),
+            Self::E | Self::Right => (1, 0),
+            Self::W | Self::Left => (-1, 0),
+        }
+    }
+}
+
+#[derive(Default, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Point {
     pub x: i16,
     pub y: i16,
@@ -32,6 +44,20 @@ impl Point {
             && self.x <= vw.bot_right_x
             && self.y >= vw.top_left_y
             && self.y <= vw.bot_right_y;
+    }
+
+    pub fn plus(&self, other: Point) -> Point {
+        Point {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
+    }
+
+    pub fn minus(&self, other: Point) -> Point {
+        Point {
+            x: self.x - other.x,
+            y: self.y - other.y,
+        }
     }
 
     pub fn dist(&self, p: Point) -> i16 {

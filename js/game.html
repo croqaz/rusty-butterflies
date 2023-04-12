@@ -21,12 +21,13 @@
     import { render } from 'preact';
     import App from './app.js';
     import pkg from "./pkg";
-    import { Wasm } from "./pkg";
+    import { Wasm, Direction } from "./pkg";
     pkg().then(() => {
       const r = Math.random() < 0.5 ? -1 * Math.random() : Math.random();
       const s = parseInt(r * 10_000_000).toString();
       console.log('Game seed:', s);
-      window.game = new Wasm(VIEW_W, VIEW_H, M_COLS, M_ROWS, s);
+      window.Game = new Wasm(VIEW_W, VIEW_H, M_COLS, M_ROWS, s);
+      window.Direction = Direction;
       render(<App />, document.body);
     });
   </script>
