@@ -15,6 +15,7 @@ mod map_common;
 mod map_decor;
 mod map_things;
 mod rng;
+// mod util;
 
 use crate::game::Game;
 use crate::geom::Direction;

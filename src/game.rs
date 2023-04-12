@@ -8,6 +8,7 @@ use crate::map_common::*;
 use crate::map_decor::*;
 use crate::map_things::*;
 use crate::rng::Rng;
+// use crate::util::*;
 
 pub struct Game {
     /// viewPort width
@@ -93,6 +94,22 @@ impl Game {
         // console_log!("Slide view by {d_x}x{d_y}, to {new_x}x{new_y}");
         self.vw.center = new_p;
 
+        match self.things.get_mut(&new_p) {
+            Some(t) => match t {
+                MapThing::Decor(t) => {
+                    if t.can_interact() {
+                        t.interact();
+                    }
+                }
+                MapThing::Actor(t) => {
+                    if t.can_behave() {
+                        t.behave();
+                    }
+                }
+            },
+            _ => {}
+        };
+
         true
     }
 
@@ -117,14 +134,14 @@ impl Game {
         };
 
         // TODO: reuse window instead of allocating new
-        let mut window: Vec<Vec<Vnode>> = Vec::new();
+        let mut window: Vec<Vec<Vnode>> = Vec::with_capacity(self.v_height as usize);
 
         // Iterate through all visible map cells
-        for y in self.vw.top_left_y..self.vw.bot_right_y {
-            let mut line: Vec<Vnode> = Vec::new();
-            for x in self.vw.top_left_x..self.vw.bot_right_x {
+        for d_y in self.vw.top_left_y..self.vw.bot_right_y {
+            let mut line: Vec<Vnode> = Vec::with_capacity(self.v_width as usize);
+            for d_x in self.vw.top_left_x..self.vw.bot_right_x {
                 // Fetch the glyph for tile and render it to screen at offset position
-                let tile = self.tiles[y as usize][x as usize];
+                let tile = self.tiles[d_y as usize][d_x as usize];
                 // Should export AS MUCH INFO as possible
                 // enough for the front-end to decide what to do with the map
                 // EG: creature groups, name, description...
@@ -138,18 +155,13 @@ impl Game {
         }
 
         // Render all things & entities ...
-        for (xy, t) in &self.things {
+        for (xy, mt) in &self.things {
             if !xy.is_visible(&self) {
                 continue;
             }
-            match t.thing() {
-                Some(t) => {
-                    window[(xy.y - self.vw.top_left_y) as usize]
-                        [(xy.x - self.vw.top_left_x) as usize]
-                        .children = t.ch.into();
-                }
-                None => {}
-            }
+            let t = mt.thing();
+            window[(xy.y - self.vw.top_left_y) as usize][(xy.x - self.vw.top_left_x) as usize]
+                .children = t.ch.into();
         }
 
         // Render Player at ViewPort center
@@ -222,6 +234,16 @@ impl Game {
             Point { x: 3, y: 3 },
             MapThing::Actor(MapActor::Abutterfly(Butterfly::default())),
         );
+
+        self.register_entity(
+            Point { x: 6, y: 6 },
+            MapThing::Actor(MapActor::Acat(Cat::default())),
+        );
+
+        self.register_entity(
+            Point { x: 7, y: 7 },
+            MapThing::Actor(MapActor::Adog(Dog::default())),
+        );
     }
 
     /// Engine logic
@@ -234,6 +256,7 @@ impl Game {
         true
     }
 
+    #[allow(dead_code)]
     fn remove_entity(&mut self, t: &MapThing) -> bool {
         let found: Vec<Point> = self
             .things

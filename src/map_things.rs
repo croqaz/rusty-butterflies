@@ -7,17 +7,15 @@ use crate::map_decor::*;
 ///
 #[derive(PartialEq, Eq)]
 pub enum MapThing {
-    None,
     Decor(MapDecor),
     Actor(MapActor),
 }
 
 impl MapThing {
-    pub fn thing(&self) -> Option<&AbstractThing> {
+    pub fn thing(&self) -> &AbstractThing {
         match self {
-            MapThing::None => None,
-            MapThing::Decor(a) => Some(a.thing()),
-            MapThing::Actor(a) => Some(a.thing()),
+            MapThing::Decor(a) => a.thing(),
+            MapThing::Actor(a) => a.thing(),
         }
     }
 }
@@ -59,11 +57,15 @@ impl Interaction for MapDecor {
 #[derive(PartialEq, Eq)]
 pub enum MapActor {
     Abutterfly(Butterfly),
+    Acat(Cat),
+    Adog(Dog),
 }
 
 impl MapActor {
     pub fn thing(&self) -> &AbstractThing {
         match self {
+            MapActor::Acat(a) => &a.t,
+            MapActor::Adog(a) => &a.t,
             MapActor::Abutterfly(a) => &a.t,
         }
     }
@@ -71,9 +73,17 @@ impl MapActor {
 
 impl Behavior for MapActor {
     fn can_behave(&self) -> bool {
-        true
+        match self {
+            MapActor::Acat(a) => a.can_behave(),
+            MapActor::Adog(a) => a.can_behave(),
+            MapActor::Abutterfly(a) => a.can_behave(),
+        }
     }
     fn behave(&mut self) {
-        //
+        match self {
+            MapActor::Acat(a) => a.behave(),
+            MapActor::Adog(a) => a.behave(),
+            MapActor::Abutterfly(a) => a.behave(),
+        }
     }
 }
