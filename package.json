@@ -1,0 +1,46 @@
+{
+  "private": true,
+  "name": "rusty-butter",
+  "version": "0.0.1",
+  "license": "UNLICENSED",
+  "source": "js/game.html",
+  "scripts": {
+    "wasm:build": "wasm-pack build --target web --out-dir ./js/pkg",
+    "wasm:optim": "wasm-opt js/pkg/rusty_butter_bg.wasm -Os -o js/pkg/butter.wasm",
+    "wasm:watch": "cargo watch -i .gitignore -s 'wasm-pack build --target web --out-dir ./js/pkg'",
+    "build": "parcel build",
+    "serve": "parcel serve --lazy"
+  },
+  "eslintConfig": {
+    "extends": "preact",
+    "ignorePatterns": [
+      "target/",
+      "dist/",
+      "src/"
+    ]
+  },
+  "alias": {
+    "react": "preact/compat",
+    "react-dom": "preact/compat",
+    "react/jsx-runtime": "preact/jsx-runtime"
+  },
+  "dependencies": {
+    "preact": "10.13.2",
+    "rusty-butter": "file:src/pkg"
+  },
+  "devDependencies": {
+    "parcel": "2.8.3",
+    "prettier": "2.8.7"
+  },
+  "engines": {
+    "node": ">= 16"
+  },
+  "browserslist": [
+    "last 1 version",
+    "> 5%",
+    "not dead"
+  ],
+  "jest": {
+    "preset": "jest-preset-preact"
+  }
+}

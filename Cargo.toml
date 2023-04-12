@@ -1,0 +1,26 @@
+[package]
+name = "rusty-butter"
+publish = false
+version = "0.0.1"
+license = "Unlicense"
+description = "Chasing rusty butterflies is a game"
+edition = "2021"
+
+[dependencies]
+console_error_panic_hook = "0.1.7"
+js-sys = "0.3.61"
+lol_alloc = "0.3.0"
+serde = { version = "1.0.159", features = ["derive"] }
+serde-wasm-bindgen = "0.5.0"
+wasm-bindgen = { version = "0.2.84", features = ["serde-serialize"] }
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+lto = true
+opt-level = "s"
+strip = "debuginfo"
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
