@@ -102,3 +102,12 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Misc
+Cargo.lock
+package-lock.json
+
+# Build folders
+target
+build
+pkg
