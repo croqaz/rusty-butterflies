@@ -1,6 +1,7 @@
 use serde::Serialize;
 use std::cmp;
 use std::collections::HashMap;
+use std::process;
 
 use crate::geom::Point;
 use crate::map_actor::*;
@@ -21,8 +22,11 @@ pub struct Game {
     /// map height
     pub m_height: i16,
 
-    /// viewport object
+    /// viewPort object
     pub vw: ViewPort,
+
+    /// pre-allocated grid
+    window: Vec<Vec<Vnode>>,
 
     /// player object
     player: Player,
@@ -40,19 +44,19 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new(view_w: i16, view_h: i16, map_w: i16, map_h: i16, seed: i64) -> Option<Self> {
+    #[inline]
+    pub fn new(view_w: i16, view_h: i16, map_w: i16, map_h: i16, seed: i64) -> Self {
         if view_w < 4 || view_h < 4 {
             // console_err!("View WxH too small: {view_w}x{view_h}");
-            return None;
+            process::abort();
         }
         if view_w % 2 != 0 || view_h % 2 != 0 {
             // console_err!("View WxH not even: {view_w}x{view_h}");
-            return None;
+            process::abort();
         }
-
         if map_w < 8 || map_h < 8 {
             // console_err!("Map WxH too small: {map_w}x{map_h}");
-            return None;
+            process::abort();
         }
 
         let player = Player {
@@ -63,6 +67,20 @@ impl Game {
             group: vec![Group::Player, Group::Human],
         };
 
+        // pre-allocate the render grid when creating the game
+        let mut window: Vec<Vec<Vnode>> = Vec::with_capacity(view_h as usize);
+        for _ in 0..view_h {
+            let mut row: Vec<Vnode> = Vec::with_capacity(view_w as usize);
+            for _ in 0..view_w {
+                row.push(Vnode {
+                    name: "span".into(),
+                    children: "".into(),
+                    props: Vec::new(),
+                });
+            }
+            window.push(row);
+        }
+
         let mut g = Game {
             v_width: view_w,
             v_height: view_h,
@@ -72,16 +90,18 @@ impl Game {
             things: HashMap::new(),
             vw: ViewPort::default(),
             rng: Rng::from_seed(seed),
+            window,
             player,
         };
 
         g.generate_map_lvl_1();
 
-        Some(g)
+        g
     }
 
     /// Slide viewport window by delta-X & delta-Y
     ///
+    #[inline]
     pub fn slide_view(&mut self, d_x: i16, d_y: i16) -> bool {
         let new_x = self.vw.center.x + d_x;
         let new_y = self.vw.center.y + d_y;
@@ -115,7 +135,8 @@ impl Game {
 
     /// Render view for external use (JSX)
     ///
-    pub fn render(&mut self) -> Vec<Vec<Vnode>> {
+    #[inline]
+    pub fn render(&mut self) -> &Vec<Vec<Vnode>> {
         {
             let half_width = self.v_width / 2;
             let half_height = self.v_height / 2;
@@ -133,25 +154,24 @@ impl Game {
             self.vw.bot_right_y = self.vw.top_left_y + self.v_height;
         };
 
-        // TODO: reuse window instead of allocating new
-        let mut window: Vec<Vec<Vnode>> = Vec::with_capacity(self.v_height as usize);
-
         // Iterate through all visible map cells
+        let mut y: usize = 0;
         for d_y in self.vw.top_left_y..self.vw.bot_right_y {
-            let mut line: Vec<Vnode> = Vec::with_capacity(self.v_width as usize);
+            let mut x: usize = 0;
             for d_x in self.vw.top_left_x..self.vw.bot_right_x {
                 // Fetch the glyph for tile and render it to screen at offset position
                 let tile = self.tiles[d_y as usize][d_x as usize];
                 // Should export AS MUCH INFO as possible
                 // enough for the front-end to decide what to do with the map
                 // EG: creature groups, name, description...
-                line.push(Vnode {
+                self.window[y][x] = Vnode {
                     name: "span".into(),
                     props: Vec::new(),
                     children: tile.into(),
-                });
+                };
+                x += 1;
             }
-            window.push(line);
+            y += 1;
         }
 
         // Render all things & entities ...
@@ -160,20 +180,22 @@ impl Game {
                 continue;
             }
             let t = mt.thing();
-            window[(xy.y - self.vw.top_left_y) as usize][(xy.x - self.vw.top_left_x) as usize]
+            self.window[(xy.y - self.vw.top_left_y) as usize]
+                [(xy.x - self.vw.top_left_x) as usize]
                 .children = t.ch.into();
         }
 
         // Render Player at ViewPort center
-        window[(self.vw.center.y - self.vw.top_left_y) as usize]
+        self.window[(self.vw.center.y - self.vw.top_left_y) as usize]
             [(self.vw.center.x - self.vw.top_left_x) as usize]
             .children = self.player.t.ch.into();
 
-        window
+        &self.window
     }
 
-    /// clear all map bg & fg
+    /// clear map background
     ///
+    #[inline]
     fn clear_map(&mut self, c: char) {
         let h = self.m_height as usize;
         let w = self.m_width as usize;
@@ -193,6 +215,7 @@ impl Game {
 
     /// generate LVL#1 map
     ///
+    #[inline]
     fn generate_map_lvl_1(&mut self) {
         // clear everything
         self.clear_map(',');
