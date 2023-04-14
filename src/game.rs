@@ -37,7 +37,7 @@ pub struct Game {
 
     /// all things: actors & decor
     /// used for turns & listing all things from the map
-    things: HashMap<Point, MapThing>,
+    pub things: HashMap<Point, MapThing>,
 
     /// randon nr generator
     rng: Rng,
@@ -58,14 +58,6 @@ impl Game {
             // console_err!("Map WxH too small: {map_w}x{map_h}");
             process::abort();
         }
-
-        let player = Player {
-            t: AbstractThing {
-                ch: '@',
-                name: "You".into(),
-            },
-            group: vec![Group::Player, Group::Human],
-        };
 
         // pre-allocate the render grid when creating the game
         let mut window: Vec<Vec<Vnode>> = Vec::with_capacity(view_h as usize);
@@ -90,8 +82,8 @@ impl Game {
             things: HashMap::new(),
             vw: ViewPort::default(),
             rng: Rng::from_seed(seed),
+            player: Player::default(),
             window,
-            player,
         };
 
         g.generate_map_lvl_1();

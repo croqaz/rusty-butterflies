@@ -1,3 +1,4 @@
+use crate::game::Game;
 use crate::geom::Point;
 
 /// All items implement interaction
@@ -12,10 +13,11 @@ pub trait Interaction {
 ///
 pub trait Movement {
     fn can_move(&self) -> bool;
-    fn try_move(&mut self, p: &Point) {
+    fn try_move(&mut self, p: &Point, _: &mut Game) -> bool {
         if p.x < 0 || p.y < 0 {
-            return;
+            return false;
         }
+        true
     }
 }
 

@@ -1,3 +1,5 @@
+use crate::game::Game;
+use crate::geom::Point;
 use crate::map_common::*;
 
 ///
@@ -7,6 +9,22 @@ use crate::map_common::*;
 pub struct Player {
     pub t: AbstractThing,
     pub group: Vec<Group>,
+    found_net: bool,
+    butterflies: u8,
+}
+
+impl Default for Player {
+    fn default() -> Self {
+        Self {
+            t: AbstractThing {
+                ch: '@',
+                name: "You".into(),
+            },
+            group: vec![Group::Player, Group::Human],
+            found_net: false,
+            butterflies: 0,
+        }
+    }
 }
 
 ///
@@ -31,15 +49,24 @@ impl Default for Butterfly {
     }
 }
 
-// impl Movement for Butterfly {
-//     fn can_move(&self) -> bool {
-//         true
-//     }
-//     fn try_move(&mut self) {
-//         // check if there are items or creatures on the map first!
-//         // if the map position is empty
-//     }
-// }
+impl Movement for Butterfly {
+    fn can_move(&self) -> bool {
+        true
+    }
+    fn try_move(&mut self, p: &Point, g: &mut Game) -> bool {
+        if !p.is_valid(g) {
+            return false;
+        }
+        // check if there are items or creatures on the map!
+        // if the map position is NOT empty, cannot move
+        if g.things.contains_key(&p) {
+            return false;
+        };
+        // TODO: check if map tile is walkable
+        //
+        true
+    }
+}
 
 impl Behavior for Butterfly {
     fn can_behave(&self) -> bool {
@@ -73,16 +100,6 @@ impl Default for Cat {
     }
 }
 
-// impl Movement for Cat {
-//     fn can_move(&self) -> bool {
-//         true
-//     }
-//     fn try_move(&mut self, p: &Point) {
-//         // check if there are items or creatures on the map first!
-//         // if the map position is empty, them:
-//     }
-// }
-
 impl Behavior for Cat {
     fn can_behave(&self) -> bool {
         true
@@ -114,16 +131,6 @@ impl Default for Dog {
         }
     }
 }
-
-// impl Movement for Dog {
-//     fn can_move(&self) -> bool {
-//         true
-//     }
-//     fn try_move(&mut self, p: &Point) {
-//         // check if there are items or creatures on the map first!
-//         // if the map position is empty, them:
-//     }
-// }
 
 impl Behavior for Dog {
     fn can_behave(&self) -> bool {
