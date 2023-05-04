@@ -1,9 +1,9 @@
 # Chasing rusty butterflies 🦋
 
-A tiny game about chasing butterflies.
+Failed Rust experiment.
 
-Using Preact + Rust WASM.
-​
+Check : https://github.com/croqaz/zigzag-butterflies
+
 -----
 
 ## License
